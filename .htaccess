@@ -1,0 +1,6 @@
+Options All -Indexes
+
+RewriteEngine On
+RewriteRule ^([a-zA-Z0-9/_]+)$ public/index.php?p=$1
+
+DirectoryIndex  public/index.php?p=home
