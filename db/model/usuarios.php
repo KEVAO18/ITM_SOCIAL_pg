@@ -442,7 +442,6 @@ namespace App\Model{
             return $this;
         }
     }
-
 }
 
 ?>

@@ -2,7 +2,7 @@
 
 namespace App\Model{
 
-    require_once("../../config/sql.php");
+    require_once("../../http/config/sql.php");
 
     use config\sql as q;
 

@@ -2,6 +2,8 @@
 
 namespace App\Model{
 
+    require_once("../../http/config/sql.php");
+
     use config\sql as q;
 
     class eventos{
