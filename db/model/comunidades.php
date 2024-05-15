@@ -6,6 +6,8 @@ namespace App\Model{
 
     use config\sql as q;
 
+    require_once("usuarios.php");
+
     use App\Model\usuarios as usuarios;
 
     class comunidades {
@@ -32,7 +34,7 @@ namespace App\Model{
          * metodo para pasar la informacion de la clase a array
          * 
          */
-        public function toArray() {
+        public function toArray(): array {
             return array(
                 'id_comunidades'=>$this->getIdComunidad(),
                 'nombre'=>$this->getNombre(),
@@ -42,11 +44,11 @@ namespace App\Model{
             );
         }
 
-        public function toJson(){
-            return $this->toArray();
+        public function toJson(): string {
+            return json_encode($this->toArray());
         }
 
-        public function toString(){
+        public function toString(): string {
             return "'" . $this->getIdComunidad() . 
             "','" . $this->getNombre() . 
             "','" . $this->getDescripcion() . 
@@ -62,9 +64,9 @@ namespace App\Model{
 
                 foreach ($datos as $d) {
 
-                    $temp_user = new comunidades();
+                    $temp_obj = new comunidades();
                     
-                    array_push($array, $temp_user->find('id_comunidad = '.$d['id_comunidad']));
+                    array_push($array, $temp_obj->find('id_comunidad = '.$d['id_comunidad']));
                     
                 }
 

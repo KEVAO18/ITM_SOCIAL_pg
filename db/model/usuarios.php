@@ -97,7 +97,7 @@ namespace App\Model{
          * @return array
          * 
          */
-        public function toArray() {
+        public function toArray(): array{
             return array(
                 'carnet' => $this->getCarnet(),
                 'nombre' => $this->getNombre(),
@@ -117,7 +117,7 @@ namespace App\Model{
          * @return string
          * 
          */
-        public function toJson() {
+        public function toJson():string {
             return json_encode($this->toArray());
         }
 
@@ -128,7 +128,7 @@ namespace App\Model{
          * @return string
          * 
          */
-        public function toString() {
+        public function toString():string {
 
             return "'".$this->getCarnet().
             "', '".$this->getNombre().
@@ -154,9 +154,9 @@ namespace App\Model{
                 $array = array();
 
                 foreach ($datos as $d) {
-                    $temp_user = new usuarios();
+                    $temp_obj = new usuarios();
                     
-                    array_push($array, $temp_user->find('carnet = '.$d['carnet']));
+                    array_push($array, $temp_obj->find('carnet = '.$d['carnet']));
                 }
 
                 return $array;

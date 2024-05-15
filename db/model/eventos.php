@@ -31,7 +31,7 @@ namespace App\Model{
          * metodo para pasar la informacion de la clase a array
          * 
          */
-        public function toArray() {
+        public function toArray():array {
             return array(
                 'id_evento'=>$this->getIdEvento(),
                 'fecha_evento'=>$this->getFechaEvento(),
@@ -42,11 +42,11 @@ namespace App\Model{
             );
         }
 
-        public function toJson(){
-            return $this->toArray();
+        public function toJson():string {
+            return json_encode($this->toArray());
         }
 
-        public function toString(){
+        public function toString():string {
             return "'" . $this->getIdEvento() . 
             "','" . $this->getFechaEvento() . 
             "','" . $this->getFechaCreacion() . 
@@ -62,9 +62,9 @@ namespace App\Model{
                 $array = array();
 
                 foreach ($datos as $d) {
-                    $evento = new eventos();
+                    $temp_obj = new eventos();
                     
-                    array_push($array, $evento->find('id_evento = '.$d['id_evento']));
+                    array_push($array, $temp_obj->find('id_evento = '.$d['id_evento']));
                 }
 
                 return $array;
@@ -107,6 +107,7 @@ namespace App\Model{
                 return $this;
             } catch (\Throwable $th) {
                 return "error en la peticion find fallo: ".$th;
+                
             }
         }
 
