@@ -7,7 +7,7 @@ namespace App\Model{
 
     use config\sql as q;
 
-    class usuarios_en_chat {
+    class comentarios{
         private q $query;
 
         public function __construct() {
@@ -82,9 +82,7 @@ namespace App\Model{
                 echo "error en la peticion find fallo: ".$th;
             }
         }
-
     }
-    
 }
 
 ?>

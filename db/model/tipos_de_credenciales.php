@@ -3,7 +3,9 @@
 
 namespace App\Model{
 
-    require_once("../../http/config/sql.php");
+    $dir = __DIR__."/../../http/config/sql.php";
+
+    include_once($dir);
 
     use config\sql as q;
     class tipos_de_credencial{

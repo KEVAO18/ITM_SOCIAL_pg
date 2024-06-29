@@ -2,7 +2,9 @@
 
 namespace App\Model{
 
-    require_once("../../http/config/sql.php");
+    $dir = __DIR__."/../../http/config/sql.php";
+
+    include_once($dir);
 
     use config\sql as q;
 
@@ -130,15 +132,14 @@ namespace App\Model{
          */
         public function toString():string {
 
-            return "'".$this->getCarnet().
-            "', '".$this->getNombre().
-            "', '".$this->getUsuario().
-            "', '".$this->getCorreo().
-            "', '".$this->getPassword().
-            "', '".$this->getCumple().
-            "', '".$this->getInformacion().
-            "', '".$this->getTyc()."'";
-
+            return "'{$this->getCarnet()}',
+                    '{$this->getNombre()}', 
+                    '{$this->getUsuario()}', 
+                    '{$this->getCorreo()}', 
+                    '{$this->getPassword()}', 
+                    '{$this->getCumple()}', 
+                    '{$this->getInformacion()}',
+                    '{$this->getTyc()}'";
         }
 
         /**
@@ -159,10 +160,14 @@ namespace App\Model{
                     array_push($array, $temp_obj->find('carnet = '.$d['carnet']));
                 }
 
+                http_response_code(200);
+
                 return $array;
             } catch (\Throwable $th) {
 
                 echo "error en la peticion getall fallo: ".$th;
+
+                http_response_code(500);
 
                 return array();
 
@@ -286,16 +291,99 @@ namespace App\Model{
 
                 $this->query->insert('usuarios', $columnas, $this->toString());
 
+                http_response_code(201);
+
                 return true;
 
             } catch (\Throwable $th) {
 
                 echo "error en la peticion save fallo: ".$th;
 
+                http_response_code(500);
+
                 return false;
 
             }
 
+        }
+
+        /**
+         * 
+         * metodo para actualizar los datos de un usuario en la base de datos
+         * 
+         * @param int $carnet
+         * @param string $nombre
+         * @param string $usuario
+         * @param string $correo
+         * @param string $password
+         * @param string $cumple
+         * @param string $informacion
+         * @param int $tyc
+         * 
+         * @return bool
+         * 
+         */
+        public function put(
+            int $carnet,
+            string $nombre,
+            string $usuario,
+            string $correo,
+            string $password,
+            string $cumple,
+            string $informacion,
+            int $tyc
+        ) : bool{
+            try{
+                $this->setAll(
+                    $carnet,
+                    $nombre,
+                    $usuario,
+                    $correo,
+                    $password,
+                    $cumple,
+                    $informacion,
+                    $tyc
+                );
+
+                $columnas = 'carnet, nombre, usuario, correo, contraseña, cumpleaños, informacion, tyc';
+
+                $this->query->update('usuarios', $columnas, $this->toString(), 'carnet = '.$carnet);
+
+                http_response_code(202);
+
+                return true;
+            }catch(\Throwable $th){
+                echo "error en la peticion put fallo: ".$th;
+
+                http_response_code(500);
+
+                return false;
+            }
+        }
+
+        /**
+         * 
+         * metodo para eliminar un usuario de la base de datos
+         * 
+         * @param int $carnet
+         * 
+         * @return bool
+         * 
+         */
+        public function delete(int $carnet): bool{
+            try{
+                $this->query->delete('usuarios', 'carnet = '.$carnet);
+
+                http_response_code(202);
+
+                return true;
+            }catch(\Throwable $th){
+                echo "error en la peticion delete fallo: ".$th;
+
+                http_response_code(500);
+
+                return false;
+            }
         }
 
         /**

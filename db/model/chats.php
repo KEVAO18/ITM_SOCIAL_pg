@@ -7,7 +7,7 @@ namespace App\Model{
 
     use config\sql as q;
 
-    class usuarios_en_chat {
+    class chats {
         private q $query;
 
         public function __construct() {

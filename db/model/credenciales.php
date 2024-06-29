@@ -2,7 +2,9 @@
 
 namespace App\Model{
 
-    require_once("../../http/config/sql.php");
+    $dir = __DIR__."/../../http/config/sql.php";
+
+    include_once($dir);
     
     use config\sql as q;
     
@@ -32,7 +34,7 @@ namespace App\Model{
             return array(
                 'id_credenciales' => $this->getIdCredenciales(),
                 'tipo' =>  $this->getTipo(),
-                'carnet' =>  $this->getCarnet()
+                'carnet' =>  $this->getCarnet()->toArray()
             );
         }
 

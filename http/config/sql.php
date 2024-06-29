@@ -1,5 +1,6 @@
 <?php
 
+
 namespace config{
 
     require_once('conection.php');

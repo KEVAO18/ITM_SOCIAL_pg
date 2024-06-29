@@ -1,0 +1,13 @@
+/*
+    contenedor para codigo que sea del tamaño de la pantalla y que no se desborde
+*/
+code{
+    display: block;
+    overflow-x: auto;
+    white-space: pre;
+    padding: 1em;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 1em 0;
+}
