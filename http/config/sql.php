@@ -41,20 +41,50 @@ namespace config{
         }
 
         /**
-         * execute
+         * 
+         * metodo para ejecutar una consulta
          * 
          * @param string $query
          * 
-         * @return array
+         * @param array $params
+         * 
+         * @return array|boolean
          * 
          */
-        public function execute($query){
-            $result = $this->conect()->query($query);
-            return $result;
+        public function execute($query, $params = []) {
+            try {
+
+                $stmt = $this->conect()->prepare($query);
+
+                foreach ($params as $key => $value) {
+
+                    $stmt->bindValue(':'.$key, $value);
+
+                }
+
+                $stmt->execute();
+                
+                // Si la consulta es SELECT, devolver los resultados
+                if (stripos($query, 'SELECT') === 0) {
+
+                    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+                }
+                
+                return true; // Para consultas que no devuelven resultados
+
+            } catch (\PDOException $e) {
+
+                echo 'Query failed: ' . $e->getMessage();
+
+                return false;
+
+            }
         }
+        
 
         /**
-         * select
+         * metodo para seleccionar datos de una tabla
          * 
          * @param string $tabla
          * 
@@ -67,7 +97,7 @@ namespace config{
         }
 
         /**
-         * select where
+         * metodo para seleccionar datos de una tabla con una condicion
          * 
          * @param string $tabla
          * 
@@ -83,7 +113,7 @@ namespace config{
 
         /**
          * 
-         * insert
+         * metodo para insertar datos en una tabla
          * 
          * @param string $tabla
          * 
@@ -95,36 +125,68 @@ namespace config{
          * 
          */
         public function insert($tabla, $campos, $valores){
-            $query = "INSERT INTO ".$tabla." (".$campos.") VALUES (".$valores.")";
+            try {
 
-            return ($this->execute($query)?true:false);
+                if (!is_array($campos)) {
+                    $campos = explode(",", $campos);
+                }
+
+                if (!is_array($valores)) {
+                    $valores = explode(",", $valores);
+                }
+                
+                if (count($campos) != count($valores)) {
+                    echo "Error: La cantidad de campos y valores no coincide";
+                    return false;
+                }
+
+                $placeholders = implode(",", array_map(
+                        function($campo) {
+                            return " :".trim($campo);
+                        }, $campos
+                    )
+                );
+                
+                $query = "INSERT INTO $tabla (" . implode(", ", $campos) . ") VALUES ($placeholders)";
+
+                $params = array_combine($campos, $valores);
+
+                return ($this->execute($query, $params)) ? true : false;
+                
+            } catch (\Throwable $th) {
+                echo 'Query failed: ' . $th->getMessage();
+            }
+
         }
 
         /**
          * 
-         * update
+         * metodo para actualizar datos en una tabla
          * 
          * @param string $tabla
          * 
-         * @param string $campos
-         * 
-         * @param string $valores
+         * @param string $cambio
          * 
          * @param string $condicion
          * 
          * @return boolean
          * 
          */
-        public function update($tabla, $campos, $valores, $condicion){
+        public function update($tabla, $cambio, $condicion){
 
-            $query = "UPDATE ".$tabla." SET ".$campos." = ".$valores." WHERE ".$condicion;
+            if (strpos($condicion, "=") === false) {
+                echo "Error: La condicion debe tener el formato columna = valor";
+                return false;
+            }
+
+            $query = "UPDATE ".$tabla." SET ".$cambio." WHERE ".$condicion;
 
             return ($this->execute($query))?true:false;
         }
 
         /**
          * 
-         * delete
+         * metodo para eliminar datos de una tabla
          * 
          * @param string $tabla
          * 
@@ -134,6 +196,12 @@ namespace config{
          * 
          */
         public function delete($tabla, $condicion){
+
+            if (strpos($condicion, "=") === false) {
+                echo "Error: La condicion debe tener el formato columna = valor";
+                return false;
+            }
+
             $query = "DELETE FROM ".$tabla." WHERE ".$condicion;
 
             return ($this->execute($query))?true:false;
@@ -231,7 +299,7 @@ namespace config{
 
         /**
          * 
-         * group by
+         * metodo para agrupar datos en un orden especifico
          * 
          * @param string $tabla
          * 
@@ -265,7 +333,7 @@ namespace config{
 
         /**
          * 
-         * count
+         * metodo para contar los registros de una tabla
          * 
          * @param string $tabla
          * 
@@ -280,14 +348,8 @@ namespace config{
             $query = "SELECT COUNT(".$campo.") FROM ".$tabla;
 
             $ex = $this->execute($query);
-
-            $count = 0;
-
-            foreach($ex as $e){
-                $count += 1;
-            }
-
-            return $count;
+            
+            return $ex[0]['COUNT('.$campo.')'];
         }
     }
     

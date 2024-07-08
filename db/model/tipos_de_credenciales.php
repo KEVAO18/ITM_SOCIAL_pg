@@ -20,6 +20,11 @@ namespace App\Model{
             $this->query = new q();
         }
 
+        /**
+         * Devuelve un array con los datos del tipo de credencial
+         * 
+         * @return array
+         */
         public function toArray(): array {
             return array(
                 'id_tipo' => $this->getIdTipo(),
@@ -27,15 +32,29 @@ namespace App\Model{
             );
         }
 
+        /**
+         * Devuelve un json con los datos del tipo de credencial
+         * 
+         * @return string
+         */
         public function toJson(): string {
             return json_encode($this->toArray());
         }
 
+        /**
+         * Devuelve un string con los datos del tipo de credencial
+         * 
+         * @return string
+         */
         public function toString(): string {
-            return "'".$this->getIdTipo().
-                "', '".$this->getDescripcion()."'";
+            return "'{$this->getIdTipo()}', '{$this->getDescripcion()}'";
         }
 
+        /**
+         * Devuelve un array con todos los tipos de credenciales
+         * 
+         * @return array
+         */
         public function getAll() : array {
             try {
                 $datos = $this->query->select('tipos_de_credenciales');
@@ -48,12 +67,25 @@ namespace App\Model{
                     array_push($array, $temp_obj->find('id_tipo = '.$d['id_tipo']));
                 }
 
+                http_response_code(200);
+
                 return $array;
             } catch (\Throwable $th) {
+
+                http_response_code(500);
+
                 return array('error' => $th->getMessage());
             }
         }
 
+        /**
+         * Set all data
+         * 
+         * @param int $id_tipo
+         * @param string $descripcion
+         * 
+         * @return void
+         */
         public function setAll(
             int $id_tipo,
             string $descripcion
@@ -62,6 +94,13 @@ namespace App\Model{
             $this->setDescripcion($descripcion);
         }
 
+        /**
+         * Busca un tipo de credencial
+         * 
+         * @param string $op
+         * 
+         * @return self
+         */
         public function find(string $op) {
             try {
                 $datos = $this->query->selectWhere('tipos_de_credenciales', $op);
@@ -75,6 +114,109 @@ namespace App\Model{
                 return $this;
             } catch (\Throwable $th) {
                 echo "error en la peticion find fallo: ".$th;
+            }
+        }
+
+        /**
+         * Guarda un tipo de credencial
+         * 
+         * @param int $id_tipo
+         * @param string $descripcion
+         * 
+         * @return bool
+         */
+        public function save(
+            int $id_tipo,
+            string $descripcion
+        ): bool {
+            try {
+
+                $this->setAll(
+                    $id_tipo,
+                    $descripcion
+                );
+
+                $columnas = 'id_tipo, descripcion';
+
+                $this->query->insert(
+                    'tipos_de_credenciales',
+                    $columnas,
+                    $this->toString()
+                );
+
+                http_response_code(201);
+
+                return true;
+            } catch (\Throwable $th) {
+
+                echo "error en la peticion save fallo: ".$th;
+
+                http_response_code(500);
+
+                return false;
+            }
+        }
+
+        /**
+         * Actualiza un tipo de credencial
+         * 
+         * @param int $id_tipo
+         * @param string $descripcion
+         * 
+         * @return bool
+         */
+        public function put(
+            int $id_tipo,
+            string $descripcion
+        ): bool {
+            try {
+
+            $this->setAll(
+                $id_tipo,
+                $descripcion
+            );
+                $columnas = 'id_tipo, descripcion';
+
+                $this->query->update(
+                    'tipos_de_credenciales', 
+                    $columnas, 
+                    "'".$this->getIdTipo()."', '".$this->getDescripcion()."'",
+                    'id_tipo = '.$this->getIdTipo()
+                );
+
+                http_response_code(202);
+
+                return true;
+            } catch (\Throwable $th) {
+                echo "error en la peticion update fallo: ".$th;
+                                
+                http_response_code(500);
+
+                return false;
+            }
+        }
+
+        /**
+         * Elimina un tipo de credencial
+         * 
+         * @return bool
+         */
+        public function delete(): bool{
+            try {
+                $this->query->delete(
+                    'tipos_de_credenciales',
+                    'id_tipo = '.$this->getIdTipo()
+                );
+
+                http_response_code(202);
+
+                return true;
+            } catch (\Throwable $th) {
+                echo "error en la peticion delete fallo: ".$th;
+                                
+                http_response_code(500);
+
+                return false;
             }
         }
 

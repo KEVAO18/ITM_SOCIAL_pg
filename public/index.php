@@ -20,10 +20,12 @@ try {
 </head>
 
 <body>
+    <main class="container">
     <?php
 
-    require_once __DIR__.'/../web/welcome.php';
+        require_once __DIR__.'/../web/welcome.php';
 
     ?>
+    </main>
 </body>
 </html>

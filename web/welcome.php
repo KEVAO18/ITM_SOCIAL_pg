@@ -11,9 +11,19 @@
 
         $usuarios = new usuarios();
 
-        foreach ($usuarios->getAll() as $usuario) {
-            echo $usuario->toString();
+        // print_r($usuarios->save(2, 'Lucas', 'Luck', 'lucas@pruebas.com', '12345678', '2021-10-10', '{}', 0));
+
+        $usuario = $usuarios->find("carnet = 5");
+
+        if ($usuario) {
+            echo $usuario->toJson();
+        } else {
+            echo "No se encontró el usuario";
         }
+
+        // foreach ($usuarios->getAll() as $usuario) {
+        //     print_r($usuario->toJson());
+        // }
         ?>
     </code>
     <hr>

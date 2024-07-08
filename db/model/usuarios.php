@@ -91,7 +91,7 @@ namespace App\Model{
         public function __construct() {
             $this->query = new q();
         }
-
+        
         /**
          * 
          * metodo para convertir todos los datos de la clase en un array
@@ -105,8 +105,8 @@ namespace App\Model{
                 'nombre' => $this->getNombre(),
                 'usuario' => $this->getUsuario(),
                 'correo' => $this->getCorreo(),
-                'contraseña' => $this->getPassword(),
-                'cumpleaños' => $this->getCumple(),
+                'password' => $this->getPassword(),
+                'cumple' => $this->getCumple(),
                 'informacion' => $this->getInformacion(),
                 'tyc' => $this->getTyc()
             );
@@ -132,14 +132,7 @@ namespace App\Model{
          */
         public function toString():string {
 
-            return "'{$this->getCarnet()}',
-                    '{$this->getNombre()}', 
-                    '{$this->getUsuario()}', 
-                    '{$this->getCorreo()}', 
-                    '{$this->getPassword()}', 
-                    '{$this->getCumple()}', 
-                    '{$this->getInformacion()}',
-                    '{$this->getTyc()}'";
+            return "'{$this->getCarnet()}', '{$this->getNombre()}', '{$this->getUsuario()}', '{$this->getCorreo()}', '{$this->getPassword()}', '{$this->getCumple()}', '{$this->getInformacion()}', '{$this->getTyc()}'";
         }
 
         /**
@@ -227,19 +220,25 @@ namespace App\Model{
 
                 $datos = $this->query->selectWhere('usuarios', $op);
 
-                foreach ($datos as $d) {
-                    $this->setAll(
-                        $d['carnet'],
-                        $d['nombre'],
-                        $d['usuario'],
-                        $d['correo'],
-                        $d['contraseña'],
-                        $d['cumpleaños'],
-                        $d['informacion'],
-                        $d['tyc']
-                    );
-                }
+                if (count($datos) > 0) {
 
+                    foreach ($datos as $d) {
+                        $this->setAll(
+                            $d['carnet'],
+                            $d['nombre'],
+                            $d['usuario'],
+                            $d['correo'],
+                            $d['password'],
+                            $d['cumple'],
+                            $d['informacion'],
+                            $d['tyc']
+                        );
+                    }
+                }else{
+                    
+                    $this->setAll(0, '', '', '', '', '', '', 0);
+
+                }
                 return $this;
 
             } catch (\Throwable $th) {
@@ -260,7 +259,7 @@ namespace App\Model{
          * @param string $informacion
          * @param int $tyc
          * 
-         * @return bool
+         * @return string
          * 
          */
         public function save(
@@ -272,39 +271,53 @@ namespace App\Model{
             string $cumple,
             string $informacion,
             int $tyc
-        ): bool {
+        ): string {
+
+            $msg = array();
 
             try {
 
-                $this->setAll(
-                    $carnet,
-                    $nombre,
-                    $usuario,
-                    $correo,
-                    $password,
-                    $cumple,
-                    $informacion,
-                    $tyc
-                );
+                $verify = $this->query->selectWhere('usuarios', "carnet = '{$carnet}'");
 
-                $columnas = 'carnet, nombre, usuario, correo, contraseña, cumpleaños, informacion, tyc';
+                if (count($verify) > 0) {
 
-                $this->query->insert('usuarios', $columnas, $this->toString());
+                    $msg = ["message" => "el usuario ya existe"];
 
-                http_response_code(201);
+                    http_response_code(400);
 
-                return true;
+                }else{
+
+                    $this->setAll(
+                        $carnet,
+                        $nombre,
+                        $usuario,
+                        $correo,
+                        $password,
+                        $cumple,
+                        $informacion,
+                        $tyc
+                    );
+    
+                    $columnas = array_keys($this->toArray());
+    
+                    $this->query->insert('usuarios', $columnas, $this->toArray());
+    
+                    $msg = ["message" => "Usuario creado con exito"];
+                    
+                    http_response_code(201);
+
+                }
+                
 
             } catch (\Throwable $th) {
 
-                echo "error en la peticion save fallo: ".$th;
+                $msg = ["message" => "error en la peticion save fallo: ".$th];
 
                 http_response_code(500);
-
-                return false;
-
+                
             }
-
+            
+            return json_encode($msg);
         }
 
         /**
@@ -333,31 +346,85 @@ namespace App\Model{
             string $informacion,
             int $tyc
         ) : bool{
+
+            $msg = array();
+
             try{
-                $this->setAll(
-                    $carnet,
-                    $nombre,
-                    $usuario,
-                    $correo,
-                    $password,
-                    $cumple,
-                    $informacion,
-                    $tyc
+
+                $verify = $this->find("carnet = {$carnet}")->toArray()['carnet'];
+
+                if ($verify == 0 && !$verify) {
+
+                    $msg = ["message" => "el usuario no existe"];
+
+                    http_response_code(400);
+
+                }else{
+
+                    $new_user = new usuarios();
+    
+                    $new_user->setAll(
+                        $carnet,
+                        $nombre,
+                        $usuario,
+                        $correo,
+                        $password,
+                        $cumple,
+                        $informacion,
+                        $tyc
+                    );
+    
+                    $sets = implode(", ", array_map(
+                        function($key, $value){
+                            return "{$key} = '{$value}'";
+                        },
+                        array_keys($new_user->toArray()), 
+                        $new_user->toArray()
+                    ));
+    
+                    $this->query->update('usuarios', $sets, 'carnet = '.$carnet);
+
+                    $msg = ["message" => "el usuario fue actualizado con exito"];
+    
+                    http_response_code(202);
+
+                }
+
+            }catch(\Throwable $th){
+                $msg = ["message" => "error en la peticion put fallo: ".$th];
+
+                http_response_code(500);
+
+            }
+            return json_encode($msg);
+        }
+
+        public function patch(
+            $carnet,
+            $columna,
+            $valorNuevo
+        ) : bool {
+
+            try {
+
+                $this->query->update(
+                    'usuarios',
+                    "{$columna} = '{$valorNuevo}'",
+                    "carnet = '{$carnet}'"
                 );
-
-                $columnas = 'carnet, nombre, usuario, correo, contraseña, cumpleaños, informacion, tyc';
-
-                $this->query->update('usuarios', $columnas, $this->toString(), 'carnet = '.$carnet);
 
                 http_response_code(202);
 
                 return true;
-            }catch(\Throwable $th){
+
+            } catch (\Throwable $th) {
+
                 echo "error en la peticion put fallo: ".$th;
 
                 http_response_code(500);
 
                 return false;
+
             }
         }
 

@@ -3,9 +3,11 @@
 */
 code{
     display: block;
+    inline-size: 90vw;
     overflow-x: auto;
     white-space: pre;
-    padding: 1em;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
     background-color: #f8f8f8;
     border: 1px solid #ccc;
     border-radius: 5px;
